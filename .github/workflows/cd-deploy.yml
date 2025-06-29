@@ -1,19 +1,15 @@
-name: CD Deploy from App Repo
+name: CD Deploy to EKS
 
 on:
   repository_dispatch:
-    types: [trigger-deploy]
-
-permissions:
-  id-token: write
-  contents: read
+    types: [deploy-mdapkr]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Helm repo
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
@@ -26,7 +22,7 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ap-south-1 --name mdapkr-cluster
 
-      - name: Helm deploy
+      - name: Deploy with Helm
         env:
           IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
           ECR_REGISTRY: 055029294053.dkr.ecr.ap-south-1.amazonaws.com
@@ -35,3 +31,4 @@ jobs:
           helm upgrade --install mdapkr ./helm/mdapkr/mdapkr \
             --set fastapi.image.repository=$ECR_REGISTRY/mdapkr-fastapi \
             --set fastapi.image.tag=$IMAGE_TAG
+
