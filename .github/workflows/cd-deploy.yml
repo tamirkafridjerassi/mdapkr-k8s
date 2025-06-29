@@ -4,10 +4,6 @@ on:
   repository_dispatch:
     types: [deploy-mdapkr]
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,6 +17,10 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::055029294053:role/GitHubActionsECRPush
           aws-region: ap-south-1
+
+      - name: Update kubeconfig for EKS cluster
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name mdapkr-cluster
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
