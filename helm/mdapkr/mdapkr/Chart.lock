@@ -1,0 +1,9 @@
+dependencies:
+- name: fastapi
+  repository: file://../../fastapi
+  version: 0.1.0
+- name: mongodb
+  repository: file://../../mongodb
+  version: 0.1.0
+digest: sha256:df19818d56bc7fea09c56a0441496e5fa75f28eeac6d75f507dcc7a2b1c74b7d
+generated: "2025-06-28T17:35:18.221230929+03:00"
