@@ -1,4 +1,4 @@
-name: CD Deploy to EKS
+name: CD Deploy
 
 on:
   repository_dispatch:
@@ -9,26 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Helm repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::055029294053:role/GitHubActionsECRPush
           aws-region: ap-south-1
 
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig --region ap-south-1 --name mdapkr-cluster
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
 
-      - name: Deploy with Helm
-        env:
-          IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
-          ECR_REGISTRY: 055029294053.dkr.ecr.ap-south-1.amazonaws.com
+      - name: Deploy using Helm
         run: |
           helm dependency update ./helm/mdapkr/mdapkr
           helm upgrade --install mdapkr ./helm/mdapkr/mdapkr \
-            --set fastapi.image.repository=$ECR_REGISTRY/mdapkr-fastapi \
-            --set fastapi.image.tag=$IMAGE_TAG
-
+            --set fastapi.image.repository=055029294053.dkr.ecr.ap-south-1.amazonaws.com/mdapkr-fastapi \
+            --set fastapi.image.tag=${{ github.event.client_payload.image_tag }}
